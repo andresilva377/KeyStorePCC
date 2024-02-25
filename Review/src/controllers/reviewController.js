@@ -9,12 +9,12 @@ exports.createReview = async (req, response) => {
 
   // Check if the user with the provided email exists
   axios
-    .get(`http://localhost:8080/http-auth/user/verify/${userEmail}`)
+    .get(`http://auth-service:3001/user/verify/${userEmail}`)
     .then((res) => {
       const { success } = res.data;
       if (success === 1) {
         axios
-          .get(`http://localhost:8080/http-product/game/verify/${gameid}`)
+          .get(`http://product-service:3002/game/verify/${gameid}`)
           .then(async (res) => {
             const { success } = res.data;
             if (success === 1) {
@@ -48,7 +48,7 @@ exports.getReview = async (req, response) => {
     const gameid = req.params.gameid;
 
     axios
-      .get(`http://localhost:8080/http-product/game/verify/${gameid}`)
+      .get(`http://product-service:3002/game/verify/${gameid}`)
       .then(async (res) => {
         const { success } = res.data;
         if (success === 1) {
@@ -110,7 +110,7 @@ exports.deleteReview = async (req, res) => {
     const reviewId = req.params.reviewId;
 
     const deletedReview = await Review.findByIdAndDelete(reviewId);
-    if (!deletedGame) {
+    if (!deletedReview) {
       return res.status(404).json({ message: "Review not found" });
     }
     res.status(200).json({ message: "Review deleted successfully" });
@@ -119,3 +119,4 @@ exports.deleteReview = async (req, res) => {
     res.status(500).send("Internal server error");
   }
 };
+

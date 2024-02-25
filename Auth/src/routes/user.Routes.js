@@ -10,6 +10,8 @@ router.post("/user/login", log.logMiddleware, usersController.login);
 router.post("/user/register", log.logMiddleware, usersController.register);
 router.get("/user/:id", auth.required, log.logMiddleware, usersController.getUser);
 router.get("/user/verify/:email", usersController.verifyUserByEmail);
+router.post("/user/addOrderId", usersController.addOrderId);
+
 router.get("/", log.logMiddleware, (req, res) => {
   try {
     return res.status(200).json({ msg: "Welcome to our API" });
@@ -20,3 +22,6 @@ router.get("/", log.logMiddleware, (req, res) => {
 });
 
 module.exports = router;
+ 
+
+ 

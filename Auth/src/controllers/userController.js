@@ -136,6 +136,7 @@ exports.getUser = async (req, res) => {
         id: user.id,
         email: user.email,
         name: user.name,
+        order_id: user.order_id
       },
     };
 
@@ -162,5 +163,33 @@ exports.verifyUserByEmail = async (req, res) => {
     return res.status(200).send({ success: 1 });
   } catch (err) {
     return res.status(500).send({ error: err, message: err.message });
+  }
+};
+
+
+exports.addOrderId = async (req, response) => {
+
+  const { userEmail, order_id } = req.body;
+  // Check if the user with the provided email exists
+  try {
+    const userRes = await User.findOne({ userEmail });
+    if (userRes) {
+      // Update the user's orderid
+      userRes.order_id = order_id;
+
+      try {
+        await userRes.save();
+        return response.status(200).json(userRes);
+      } catch (error) {
+
+        console.error(error);
+        return response.status(500).send("Internal server error");
+      }
+
+    } else {
+      return response.status(404).send("User not found");
+    }
+  } catch (error) {
+    return response.status(500).send({ error: error, message: error.message });
   }
 };

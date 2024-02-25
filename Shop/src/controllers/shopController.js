@@ -1,8 +1,248 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
-
+const axios = require("axios");
 const Shop = require("../models/shopModel");
+const crypto = require('crypto');
 
+/*
+exports.addPurchase = async (req, response) => {
+
+  const { gameid, userEmail, data } = req.body;
+
+
+  // Check if the user with the provided email exists
+
+  axios
+
+    .get(`http://localhost:3001/user/verify/${userEmail}`)
+
+    .then((res) => {
+
+      const { success } = res.data;
+
+      if (success === 1) {
+
+        axios
+
+          .get(`http://localhost:3002/game/verify/${gameid}`)
+
+          .then( (res) => {
+
+            const { success } = res.data;
+
+            if (success === 1) {
+
+              // Find the user with the provided email
+
+              axios
+
+                .get(`http://localhost:3001/user/verify/${userEmail}`)
+
+                .then( async (res) => {
+
+                  const { success, user } = res.data;
+
+                  if (success === 1) {
+
+                    // Create the purchase with the game name
+
+                    const shop = new Shop({ gameid, userEmail, data });
+
+                    try {
+
+                      // Save the purchase in the shop database
+
+                      const savedShop = await shop.save();
+
+
+                      // Add the purchase to the user's purchases array
+
+                      user.compras.push({ gameid, data });
+                      
+
+                      const updatedUser = await user.save();
+
+
+                      return response.status(201).json({ shop: savedShop, user: updatedUser });
+
+                    } catch (error) {
+
+                      console.error(error);
+
+                      return response.status(500).send("Internal server error");
+
+                    }
+
+                  } else {
+
+                    return response.status(404).send("User not found");
+
+                  }
+
+                })
+
+                .catch((error) => {
+
+                  return response.status(500).send({ error: error, message: error.message });
+
+                });
+
+            } else {
+
+              return response.status(404).send("Game not found");
+
+            }
+
+          })
+
+          .catch((error) => {
+
+            return response.status(500).send({ error: error, message: error.message });
+
+          });
+
+      } else {
+
+        return response.status(404).send("User not found");
+
+      }
+
+    })
+
+    .catch((error) => {
+
+      return response.status(500).send({ error: error, message: error.message });
+
+    });
+
+};
+*/
+
+
+
+
+exports.addPurchase = async (req, response) => {
+
+  const { gameid, userEmail, data } = req.body;
+
+  // Check if the user with the provided email exists
+
+  try {
+    const userRes = await axios.get(`http://localhost:3001/user/verify/${userEmail}`);
+    const { success } = userRes.data;
+
+    if (success === 1) {
+
+      const gameRes = await axios.get(`http://localhost:3002/game/verify/${gameid}`);
+      const { success } = gameRes.data;
+
+      if (success === 1) {
+
+        // Generate a random game key
+        const game_key = crypto
+
+          .randomBytes(8)
+          .toString('hex')
+          .match(/.{1,4}/g)
+          .join('-')
+          .toUpperCase();
+
+        // Create the purchase with the game name
+        const shop = new Shop({ gameid, userEmail, data, game_key });
+
+        try {
+          await shop.save();
+
+          order_id = req.params.id;
+          // Call the auth service to add the orderid to the user
+
+          //venho por este meio informar que é esta linha que está a foder tudo
+          //Basicamente estou a ir buscar a função de addOrderId defenida no serviço de Auth
+          //Para quando realizada uma compra ele guarde o order_id
+          //O erro que dá é que supostamente ele não consegue encontrar o user, como este post tem 2 entradas não sei ao certo
+          //se a outra função também está corrreta. Tanto é que eu tiro o userEmail e ele não dá erro, embora não faça nada, portanto o erro está à volta do userEmail
+          await axios.post(`http://localhost:3001/user/addOrderId`, { userEmail, order_id});
+          
+          
+          return response.status(201).json(shop);
+
+        } catch (error) {
+          console.error(error);
+          return response.status(500).send("Internal server error");
+        }
+
+      } else {
+
+        return response.status(404).send("Game not found");
+      }
+
+    } else {
+      return response.status(404).send("User not found");
+    }
+  } catch (error) {
+    return response.status(500).send({ error: error, message: error.message });
+  }
+};
+
+
+//get a purchase 
+exports.getPurchase = async (req, response) => {
+  try {
+    const userEmail = req.params.userEmail;
+
+    axios
+      .get(`http://localhost:3001/user/verify/${userEmail}`)
+      .then(async (res) => {
+        const { success } = res.data;
+        if (success === 1) {
+          try {
+            const shop = await Shop.find({ userEmail: userEmail });
+
+            if (!shop) {
+              return response.status(404).send({ success: 0, message: "Don't have purchases!" });
+            }
+
+            return response.status(200).json(shop);
+          } catch (error) {
+            console.error(error);
+            return response.status(500).send("Internal server error");
+          }
+        } else {
+          return response.status(404).send("Purchse not found");
+        }
+      })
+      .catch((error) => {
+        return response.status(500).send({ error: error, message: error.message });
+      });
+  } catch (error) {
+    console.error(error);
+    response.status(500).send("Internal server error");
+  }
+};
+
+// Function to delete an existing review
+exports.deletePurchase = async (req, res) => {
+  try {
+    const purchaseId = req.params.purchaseId;
+
+    const deletePurchase = await Shop.findByIdAndDelete(purchaseId);
+    if (!deletePurchase) {
+      return res.status(404).json({ message: "Purchase not found" });
+    }
+    res.status(200).json({ message: "Purchase deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+};
+
+
+
+
+
+
+
+/*
 //add a product to the wishlist
 exports.addProduct = async (req, res) => {
   try {
@@ -124,3 +364,4 @@ exports.deletePurchase = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+*/
