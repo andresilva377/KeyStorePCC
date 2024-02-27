@@ -1,0 +1,26 @@
+apiVersion: Auth/v1uth/v1
+kind: Deployment
+metadata:
+  name: auth-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: Auth
+  template:
+    metadata:
+      labels:
+        app: Auth
+    spec:
+      containers:
+      - name: keystorepcc
+        image: keystorepcc_auth-service
+        ports:
+        - containerPort: 3001
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 250m
+            memory: 500Mi

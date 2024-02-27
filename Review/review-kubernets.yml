@@ -1,0 +1,26 @@
+apiVersion: Review/v1
+kind: Deployment
+metadata:
+  name: review-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: Review
+  template:
+    metadata:
+      labels:
+        app: Review
+    spec:
+      containers:
+      - name: Review
+        image: keystorepcc_review-service
+        ports:
+        - containerPort: 3000
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 250m
+            memory: 500Mi

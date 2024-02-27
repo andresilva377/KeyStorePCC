@@ -1,0 +1,26 @@
+apiVersion: Product/v1
+kind: Deployment
+metadata:
+  name: product-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: Product
+  template:
+    metadata:
+      labels:
+        app: Product
+    spec:
+      containers:
+      - name: Product
+        image: keystorepcc_prodcut-service
+        ports:
+        - containerPort: 3002
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 250m
+            memory: 500Mi

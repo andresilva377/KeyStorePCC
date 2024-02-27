@@ -1,0 +1,26 @@
+apiVersion: Shop/v1
+kind: Deployment
+metadata:
+  name: shop-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: Shop
+  template:
+    metadata:
+      labels:
+        app: Shop
+    spec:
+      containers:
+      - name: Shop
+        image: keystorepcc_shop-service
+        ports:
+        - containerPort: 3003
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 250m
+            memory: 500Mi

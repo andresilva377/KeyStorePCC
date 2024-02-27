@@ -149,3 +149,26 @@ exports.verifyGameById = async (req, res) => {
     return res.status(500).send({ error: err, message: err.message });
   }
 };
+
+
+exports.GameCompatibility = async (req, res) => {
+
+  const { ram } = req.body;
+
+  try {
+    let id = req.params.id;
+    const game = await Game.findById(id);
+
+    if (ram >= game.ram) {
+      
+      res.status(200).json({ message: "Recomended specs for a good gameplay." });
+    } else {
+      
+      res.status(200).json({ message: "Not recomended specs for this game." });
+    }
+
+  } catch (error) {
+    res.status(500).json({ message: "Error comparing game compatibility." });
+  }
+
+};
