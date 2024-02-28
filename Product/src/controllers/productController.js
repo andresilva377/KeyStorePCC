@@ -7,50 +7,38 @@ const Game = require("../models/productModel");
 
 // Create a game
 exports.createGame = async (req, res) => {
-  const { title, price, genre, stock, ram, cpuModel, gpuModel, ostype } = req.body;
+  const { name, price, category, specs, stock} = req.body;
 
   // Validations
-  if (!title) {
-    return res.status(422).json({ msg: "Title is mandatory!" });
+  if (!name) {
+    return res.status(422).json({ msg: "Name is mandatory!" });
   }
   if (!price) {
     return res.status(422).json({ msg: "Price is mandatory!" });
   }
-  if (!genre) {
-    return res.status(422).json({ msg: "Genre is mandatory!" });
+  if (!category) {
+    return res.status(422).json({ msg: "Category is mandatory!" });
   }
   if (!stock) {
     stock = 0;
   }
-  if (!ram) {
-    return res.status(422).json({ msg: "Ram is mandatory!" });
-  }
-  if (!cpuModel) {
-    return res.status(422).json({ msg: "Cpu Model is mandatory!" });
-  }
-  if (!gpuModel) {
-    return res.status(422).json({ msg: "Gpu Model is mandatory!" });
-  }
-  if (!ostype) {
-    return res.status(422).json({ msg: "OS Type is mandatory!" });
+  if (!specs) {
+    return res.status(422).json({ msg: "Specs are mandatory!" });
   }
 
   // Check if Game already exists
-  const gameExist = await Game.findOne({ title: title });
+  const gameExist = await Game.findOne({ name: name });
 
   if (gameExist) {
-    return res.status(422).json({ msg: "The game already exist" });
+    return res.status(422).json({ msg: "The game already exists" });
   }
 
   const game = new Game({
-    title,
+    name,
     price,
-    genre,
+    category,
     stock,
-    ram,
-    cpuModel,
-    gpuModel,
-    ostype,
+    specs
   });
   try {
     await game.save();
