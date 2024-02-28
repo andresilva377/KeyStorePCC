@@ -80,19 +80,16 @@ exports.getGames = async (req, res) => {
 exports.editgame = async (req, res) => {
   try {
     const gameId = req.params.id;
-    const { title, price, genre, stock, ram, cpuModel, gpuModel, ostype } = req.body;
+    const { name, price, category, specs, stock } = req.body;
 
     const updatedGame = await Game.findByIdAndUpdate(
       gameId,
       {
-        title,
-        price,
-        genre,
-        stock,
-        ram,
-        cpuModel,
-        gpuModel,
-        ostype,
+        name, 
+        price, 
+        category, 
+        specs, 
+        stock
       },
       { new: true }
     );
