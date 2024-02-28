@@ -10,7 +10,6 @@ router.post("/user/login", log.logMiddleware, usersController.login);
 router.post("/user/register", log.logMiddleware, usersController.register);
 router.get("/user/:id", auth.required, log.logMiddleware, usersController.getUser);
 router.get("/user/verify/:email", usersController.verifyUserByEmail);
-router.post("/user/addOrderId", usersController.addOrderId);
 router.put("/user/addGame", usersController.addGame);
 router.get("/users", usersController.getUsers);
 

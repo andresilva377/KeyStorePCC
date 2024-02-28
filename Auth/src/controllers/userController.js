@@ -135,23 +135,13 @@ exports.getUser = async (req, res) => {
     const user = await User.findById(id, "-password");
 
     if (!user) {
-      return res.status(404).send({ success: 0, message: "User not found!" });
+      return res.status(404).send({ message: "User not found!" });
     }
 
-    // Build response
-    let response = {
-      success: 1,
-      length: user.length,
-      results: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        order_id: user.order_id,
-      },
-    };
+    const { __v, ...newUser } = user.toObject();
 
     // Send response
-    return res.status(200).send(response);
+    return res.status(200).send(newUser);
   } catch (err) {
     return res.status(500).send({ error: err, message: err.message });
   }
@@ -219,29 +209,5 @@ exports.addGame = async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.status(500).json({ msg: "Error on the Server! Try agian later!" });
-  }
-};
-
-exports.addOrderId = async (req, response) => {
-  const { userEmail, order_id } = req.body;
-  // Check if the user with the provided email exists
-  try {
-    const userRes = await User.findOne({ userEmail });
-    if (userRes) {
-      // Update the user's orderid
-      userRes.order_id = order_id;
-
-      try {
-        await userRes.save();
-        return response.status(200).json(userRes);
-      } catch (error) {
-        console.error(error);
-        return response.status(500).send("Internal server error");
-      }
-    } else {
-      return response.status(404).send("User not found");
-    }
-  } catch (error) {
-    return response.status(500).send({ error: error, message: error.message });
   }
 };

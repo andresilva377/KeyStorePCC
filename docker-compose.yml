@@ -1,5 +1,10 @@
 version: '3'
 services:
+  api-gateway:
+    build: 
+      context: ./API-Gateway
+    ports:
+      - "3004:3004"
   auth-service:
     build:
       context: ./Auth

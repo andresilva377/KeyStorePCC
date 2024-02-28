@@ -5,7 +5,7 @@ const User = mongoose.model("User", {
   email: String,
   password: String,
   userType: String,
-  specs: [{ os: String, cpu: String, gpu: String, ram: Number }],
+  specs: { os: String, cpu: String, gpu: String, ram: Number },
   games: [{ gameId: String, name: String, key: String, saleId: String }],
 });
 

@@ -21,3 +21,4 @@ const server = gateway({
 });
 
 server.start(3004);
+console.log("API-Gateway Running!");

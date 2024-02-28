@@ -7,7 +7,7 @@ const Game = require("../models/productModel");
 
 // Create a game
 exports.createGame = async (req, res) => {
-  const { name, price, category, specs, stock} = req.body;
+  const { name, price, category, specs, stock } = req.body;
 
   // Validations
   if (!name) {
@@ -38,7 +38,7 @@ exports.createGame = async (req, res) => {
     price,
     category,
     stock,
-    specs
+    specs,
   });
   try {
     await game.save();
@@ -56,7 +56,8 @@ exports.getGame = async (req, res) => {
     if (!game) {
       return res.status(404).json({ message: "Game not found" });
     }
-    res.status(200).json(game);
+    const { __v, ...newGame } = game.toObject();
+    res.status(200).json(newGame);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -138,25 +139,38 @@ exports.verifyGameById = async (req, res) => {
   }
 };
 
-
 exports.GameCompatibility = async (req, res) => {
-
   const { ram } = req.body;
 
   try {
     let id = req.params.id;
     const game = await Game.findById(id);
 
-    if (ram >= game.ram) {
-      
+    if (ram >= game.specs.ram) {
       res.status(200).json({ message: "Recomended specs for a good gameplay." });
     } else {
-      
       res.status(200).json({ message: "Not recomended specs for this game." });
     }
-
   } catch (error) {
     res.status(500).json({ message: "Error comparing game compatibility." });
   }
+};
 
+exports.reduceStock = async (req, res) => {
+  const gameId = req.params.id;
+  try {
+    const game = await Game.findById(gameId);
+
+    if (!game) {
+      return res.status(404).json({ message: "Game not found" });
+    }
+
+    game.stock--;
+
+    await game.save();
+
+    res.status(200).json({ message: "Stock reduced with success!" });
+  } catch {
+    res.status(500).json({ message: "Error reducing stock!" });
+  }
 };
