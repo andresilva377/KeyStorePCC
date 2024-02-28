@@ -20,4 +20,4 @@ const server = gateway({
   ],
 });
 
-server.start(8080);
+server.start(3004);

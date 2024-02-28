@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 
 // Models
 const User = require("../models/userModel");
+const { response } = require("../../app");
 
 // Login logic
 exports.login = async (req, res) => {
@@ -54,11 +55,11 @@ exports.login = async (req, res) => {
 
 // Register logic
 exports.register = async (req, res) => {
-  const { name, email, password, confirmpassword } = req.body;
+  const { username, email, password, confirmpassword, userType, specs } = req.body;
 
   // Validations
-  if (!name) {
-    return res.status(422).json({ msg: "Name is mandatory!" });
+  if (!username) {
+    return res.status(422).json({ msg: "Username is mandatory!" });
   }
 
   if (!email) {
@@ -95,15 +96,24 @@ exports.register = async (req, res) => {
     return res.status(422).json({ msg: "Password must have a special character!" });
   }
 
+  if (userType !== "client" && userType !== "admin") {
+    return res.status(422).json({ msg: "Invalid User Type!" });
+  }
+
+  const games = [];
+
   // Create password
   const salt = await bcrypt.genSalt(12);
   const passwordHash = await bcrypt.hash(password, salt);
 
   // create user
   const user = new User({
-    name,
+    username,
     email,
     password: passwordHash,
+    userType,
+    specs,
+    games,
   });
 
   try {
@@ -136,7 +146,7 @@ exports.getUser = async (req, res) => {
         id: user.id,
         email: user.email,
         name: user.name,
-        order_id: user.order_id
+        order_id: user.order_id,
       },
     };
 
@@ -144,6 +154,25 @@ exports.getUser = async (req, res) => {
     return res.status(200).send(response);
   } catch (err) {
     return res.status(500).send({ error: err, message: err.message });
+  }
+};
+
+exports.getUsers = async (req, res) => {
+  try {
+    const users = await User.find();
+    if (!users) {
+      return res.status(404).json({ message: "No Results" });
+    }
+
+    const modifiedUsers = users.map((user) => {
+      const { password, __v, ...userWithoutPassword } = user.toObject();
+      return userWithoutPassword;
+    });
+
+    res.status(200).json(modifiedUsers);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -166,9 +195,34 @@ exports.verifyUserByEmail = async (req, res) => {
   }
 };
 
+exports.addGame = async (req, res) => {
+  const { userId, gameId, name, key, saleId } = req.body;
+
+  const user = await User.findOne({ _id: userId });
+
+  if (!user) {
+    return res.status(422).json({ msg: "User not found!" });
+  }
+
+  const newGame = {
+    gameId: gameId,
+    name: name,
+    key: key,
+    saleId: saleId,
+  };
+
+  try {
+    user.games.push(newGame);
+    user.save();
+
+    return res.status(201).json({ msg: "Game added with success!" });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ msg: "Error on the Server! Try agian later!" });
+  }
+};
 
 exports.addOrderId = async (req, response) => {
-
   const { userEmail, order_id } = req.body;
   // Check if the user with the provided email exists
   try {
@@ -181,11 +235,9 @@ exports.addOrderId = async (req, response) => {
         await userRes.save();
         return response.status(200).json(userRes);
       } catch (error) {
-
         console.error(error);
         return response.status(500).send("Internal server error");
       }
-
     } else {
       return response.status(404).send("User not found");
     }

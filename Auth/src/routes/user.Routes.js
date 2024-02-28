@@ -11,6 +11,8 @@ router.post("/user/register", log.logMiddleware, usersController.register);
 router.get("/user/:id", auth.required, log.logMiddleware, usersController.getUser);
 router.get("/user/verify/:email", usersController.verifyUserByEmail);
 router.post("/user/addOrderId", usersController.addOrderId);
+router.put("/user/addGame", usersController.addGame);
+router.get("/users", usersController.getUsers);
 
 router.get("/", log.logMiddleware, (req, res) => {
   try {
@@ -22,6 +24,3 @@ router.get("/", log.logMiddleware, (req, res) => {
 });
 
 module.exports = router;
- 
-
- 

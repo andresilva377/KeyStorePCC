@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
 
 const Shop = mongoose.model("Shop", {
-  gameid: String,
-  userEmail: String,
-  data: Date,
-  game_key: String,
+  gameId: String,
+  userId: String,
+  amount: Number,
+  saleDate: Date,
 });
 
 module.exports = Shop;
